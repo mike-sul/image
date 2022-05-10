@@ -20,6 +20,7 @@ const (
 type ManifestItem struct { // NOTE: This is visible as docker/tarfile.ManifestItem, and a part of the stable API.
 	Config       string
 	RepoTags     []string
+	RepoDigests  []string
 	Layers       []string
 	Parent       imageID                                      `json:",omitempty"`
 	LayerSources map[digest.Digest]manifest.Schema2Descriptor `json:",omitempty"`

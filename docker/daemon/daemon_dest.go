@@ -30,8 +30,17 @@ func newImageDestination(ctx context.Context, sys *types.SystemContext, ref daem
 	if ref.ref == nil {
 		return nil, errors.Errorf("Invalid destination docker-daemon:%s: a destination must be a name:tag", ref.StringWithinTransport())
 	}
-	namedTaggedRef, ok := ref.ref.(reference.NamedTagged)
-	if !ok {
+
+	var repoDigests []string
+	var namedTaggedRef reference.NamedTagged
+	switch ref.ref.(type) {
+	case reference.NamedTagged:
+		namedTaggedRef = ref.ref.(reference.NamedTagged)
+	case reference.Canonical:
+		namedTaggedRef = nil
+		repoDigests = append(repoDigests, ref.ref.String())
+		ref.ref, _ = reference.ParseDockerRef(ref.ref.Name())
+	default:
 		return nil, errors.Errorf("Invalid destination docker-daemon:%s: a destination must be a name:tag", ref.StringWithinTransport())
 	}
 
@@ -47,6 +56,7 @@ func newImageDestination(ctx context.Context, sys *types.SystemContext, ref daem
 
 	reader, writer := io.Pipe()
 	archive := tarfile.NewWriter(writer)
+	archive.AddRepoDigests(repoDigests)
 	// Commit() may never be called, so we may never read from this channel; so, make this buffered to allow imageLoadGoroutine to write status and terminate even if we never read it.
 	statusChannel := make(chan error, 1)
 

@@ -32,6 +32,7 @@ type Writer struct {
 	legacyLayers     map[string]struct{} // A set of IDs of legacy layers that have been already sent.
 	manifest         []ManifestItem
 	manifestByConfig map[digest.Digest]int // A map from config digest to an entry index in manifest above.
+	repoDigests      []string
 }
 
 // NewWriter returns a Writer for the specified io.Writer.
@@ -44,7 +45,12 @@ func NewWriter(dest io.Writer) *Writer {
 		repositories:     map[string]map[string]string{},
 		legacyLayers:     map[string]struct{}{},
 		manifestByConfig: map[digest.Digest]int{},
+		repoDigests:      nil,
 	}
+}
+
+func (w *Writer) AddRepoDigests(repoDigests []string) {
+	w.repoDigests = repoDigests
 }
 
 // lock does some sanity checks and locks the Writer.
@@ -213,6 +219,7 @@ func (w *Writer) ensureManifestItemLocked(layerDescriptors []manifest.Schema2Des
 	newItem := ManifestItem{
 		Config:       w.configPath(configDigest),
 		RepoTags:     []string{},
+		RepoDigests:  w.repoDigests,
 		Layers:       layerPaths,
 		Parent:       "", // We don’t have this information
 		LayerSources: nil,
