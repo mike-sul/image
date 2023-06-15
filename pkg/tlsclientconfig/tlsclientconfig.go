@@ -91,14 +91,14 @@ func hasFile(files []os.DirEntry, name string) bool {
 // NewTransport Creates a default transport
 func NewTransport() *http.Transport {
 	direct := &net.Dialer{
-		Timeout:   30 * time.Second,
-		KeepAlive: 30 * time.Second,
+		Timeout:   60 * time.Second,
+		KeepAlive: 60 * time.Second,
 		DualStack: true,
 	}
 	tr := &http.Transport{
 		Proxy:               http.ProxyFromEnvironment,
 		DialContext:         direct.DialContext,
-		TLSHandshakeTimeout: 10 * time.Second,
+		TLSHandshakeTimeout: 30 * time.Second,
 		// TODO(dmcgowan): Call close idle connections when complete and use keep alive
 		DisableKeepAlives: true,
 	}
