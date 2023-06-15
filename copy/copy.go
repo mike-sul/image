@@ -810,9 +810,11 @@ func (c *copier) copyOneImage(ctx context.Context, policyContext *signature.Poli
 	}
 	sigs = append(sigs, newSigs...)
 
-	c.Printf("Storing signatures\n")
-	if err := c.dest.PutSignaturesWithFormat(ctx, sigs, targetInstance); err != nil {
-		return nil, "", "", fmt.Errorf("writing signatures: %w", err)
+	if len(sigs) > 0 {
+		c.Printf("Storing signatures\n")
+		if err := c.dest.PutSignaturesWithFormat(ctx, sigs, targetInstance); err != nil {
+			return nil, "", "", fmt.Errorf("writing signatures: %w", err)
+		}
 	}
 
 	return manifestBytes, retManifestType, retManifestDigest, nil
